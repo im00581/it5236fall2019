@@ -92,6 +92,108 @@ if ($_SERVER['REQUEST_METHOD'] == "PUT") {
 	}
 
 //PUT	
+
+	
+}elseif ($_SERVER['REQUEST_METHOD'] == "POST") {
+	
+
+	//decoding the json body from the request
+	$task = json_decode(file_get_contents('php://input'), true);
+
+	//Data Validation
+	
+	if (array_key_exists('completed', $task)) {
+		$complete = $task["completed"];
+	} else {
+		//Return 4XX error
+		http_response_code(422);
+		echo "completed error";
+		exit();
+	}
+	
+	if (array_key_exists('taskName', $task)) {
+		$taskName = $task["taskName"];
+	} else {
+		//Return 4XX error
+		http_response_code(422);
+		echo "Task Name Error";
+		exit();
+	}
+	
+	if (array_key_exists('taskDate', $task)) {
+		$taskDate = $task["taskDate"];
+	} else {
+		//Return 4XX error
+		http_response_code(422);
+		echo "TaskDate error";
+		exit();
+	}
+
+	if (!$dbconnecterror) {
+		try {
+			
+			$sql = "INSERT INTO doList (complete, listItem, finishDate) VALUES (:complete, :listItem, :finishDate)";
+			$stmt = $dbh->prepare($sql);			
+			$stmt->bindParam(":complete", $complete);
+			$stmt->bindParam(":listItem", $taskName);
+			$stmt->bindParam(":finishDate", $taskDate);
+			$response = $stmt->execute();
+			//return response code
+			http_response_code(204);
+			exit();
+
+
+		} catch (PDOException $e) {
+			//return 500 message
+			http_response_code(500);
+			echo "Db Execption";
+			exit();
+
+		}
+	} else {
+		//return 500 message
+		http_response_code(500);
+		echo "update error";
+		exit();
+	}
+
+//ADD
+
+}elseif ($_SERVER['REQUEST_METHOD'] == "DELETE") {
+
+if(array_key_exists('listID',$_GET)){
+		$listID = $_GET['listID'];
+	}else{
+	//Return 4XX error
+	http_response_code(400);
+	"No List ID";
+	exit();
+	
+	}
+
+	if (!$dbconnecterror) {
+		try {
+			$sql = "DELETE FROM doList where listID = :listID";
+			$stmt = $dbh->prepare($sql);			
+			$stmt->bindParam(":listID", $listID);
+		
+			$response = $stmt->execute();	
+			http_response_code(204);
+			exit();
+
+			
+			
+		} catch (PDOException $e) {
+			http_response_code(500);
+			echo "Db Execption";
+			exit();
+		}	
+	} else {
+		http_response_code(500);
+		echo "update error";
+		exit();
+	}
+	
 } else{
 	http_response_code(405);
 	echo "expected PUT";
@@ -99,3 +201,5 @@ if ($_SERVER['REQUEST_METHOD'] == "PUT") {
 	
 }
 ?>
+
+
