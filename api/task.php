@@ -196,7 +196,7 @@ if(array_key_exists('listID',$_GET)){
 	
 } else{
 	http_response_code(405);
-	echo "expected PUT";
+	echo "expected PUT, DELETE, or POST";
 		exit();
 	
 }
